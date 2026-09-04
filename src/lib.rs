@@ -6,6 +6,9 @@
 
 use core::fmt;
 
+#[cfg(feature = "rialo")]
+pub mod rialo;
+
 /// Maximum file count accepted by the scoring model before clamping.
 pub const MAX_FILES_CHANGED: u32 = 10_000;
 /// Maximum changed-line count accepted by the scoring model before clamping.

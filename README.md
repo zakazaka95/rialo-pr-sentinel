@@ -17,7 +17,9 @@ GitHub webhook / poller (host-owned)
 
 This boundary fits a Rialo HTTP/REX/reactive workflow: the host performs authenticated HTTP outside this crate, converts the response to `Signals`, and invokes this deterministic core. Replaying the same head SHA is a no-op even if different signals are supplied. A changed head SHA produces a new assessment and revision.
 
-No Rialo dependency is enabled in this scaffold. The published Rialo 0.18.1 crates expose deployment and runtime surfaces, but adding an unverified adapter would weaken the compile guarantee. The pure API is the intended integration seam until a concrete Venus component/WIT contract is selected.
+The optional `rialo` feature adds a thin adapter over the official `rialo-venus` 0.18.1 storage API. `rialo::evaluate_and_persist` accepts normalized `Signals`, a parsed `HeadSha`, and the Venus program accounts. It decodes prior workflow-PDA state with `read_from_storage`, calls the same deterministic core, and invokes `write_to_storage` only for `Update::Changed`. Invalid or unknown storage versions are treated as uninitialized, as in generated Venus workflow preflight code.
+
+The adapter intentionally does not fetch GitHub data, build a CDK client, sign transactions, or deploy. Authentication, normalization, instruction dispatch, wallet handling, and deployment stay with the host program and operator.
 
 ## Model v1
 
@@ -45,10 +47,11 @@ Flags indicate evidence, not policy verdicts. Hosts must define normalization ru
 
 ```console
 cargo test
+cargo test --features rialo
 cargo clippy --all-targets --all-features -- -D warnings
 cargo run --bin pr-sentinel-demo
 ```
 
 ## Future Rialo testnet deployment
 
-Deployment is intentionally out of scope here. A future testnet milestone should first pin the Rialo toolchain and Venus WIT contract, implement a thin serialization adapter, add golden tests that compare native and REX/WASM results, enforce HTTP response-size and execution-budget limits, and run replay/idempotency tests on a testnet. Only after those gates should a deploy manifest, funded test wallet, or authenticated GitHub secret be introduced in an operator-owned environment.
+Deployment is intentionally out of scope here. A future testnet milestone should select a concrete Venus DSL instruction/WIT contract around this adapter, add golden tests that compare native and REX/WASM results, enforce HTTP response-size and execution-budget limits, and run replay/idempotency tests on a testnet. Only after those gates should a deploy manifest, funded test wallet, or authenticated GitHub secret be introduced in an operator-owned environment.

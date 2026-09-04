@@ -16,6 +16,11 @@ path = "src/bin/demo.rs"
 
 [features]
 default = []
+rialo = ["dep:rialo-venus", "dep:serde"]
+
+[dependencies]
+rialo-venus = { version = "=0.18.1", optional = true }
+serde = { version = "1.0.219", features = ["derive"], optional = true }
 
 [lints.rust]
 unsafe_code = "forbid"
