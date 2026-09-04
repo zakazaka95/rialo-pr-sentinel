@@ -17,9 +17,9 @@ GitHub webhook / poller (host-owned)
 
 This boundary fits a Rialo HTTP/REX/reactive workflow: the host performs authenticated HTTP outside this crate, converts the response to `Signals`, and invokes this deterministic core. Replaying the same head SHA is a no-op even if different signals are supplied. A changed head SHA produces a new assessment and revision.
 
-The optional `rialo` feature adds a thin adapter over the official `rialo-venus` 0.18.1 storage API. `rialo::evaluate_and_persist` accepts normalized `Signals`, a parsed `HeadSha`, and the Venus program accounts. It decodes prior workflow-PDA state with `read_from_storage`, calls the same deterministic core, and invokes `write_to_storage` only for `Update::Changed`. Invalid or unknown storage versions are treated as uninitialized, as in generated Venus workflow preflight code.
+The optional `rialo` feature adds a thin adapter over the official `rialo-venus` 0.18.1 storage API. `rialo::evaluate_and_persist` accepts normalized `Signals`, a parsed `HeadSha`, and the Venus program accounts. It validates the payer signature, writable accounts, system program, derived workflow address, and initialized-account owner before any read or unchanged return. It decodes PR Sentinel state with `read_from_storage`, calls the same deterministic core, and invokes `write_to_storage` only for `Update::Changed`. Nonempty state with a foreign discriminator, invalid encoding, unknown version, obsolete model hash, or invalid score/reason bits fails closed and requires an explicit migration.
 
-The adapter intentionally does not fetch GitHub data, build a CDK client, sign transactions, or deploy. Authentication, normalization, instruction dispatch, wallet handling, and deployment stay with the host program and operator.
+The adapter owns the complete payload of a dedicated workflow PDA derived from the exact program ID, payer key, and stable PR-Sentinel-only slug. It must not share that slug/PDA with generated Venus DSL root state or another workflow because `write_to_storage` replaces the entire payload. The adapter intentionally does not fetch GitHub data, build a CDK client, sign transactions, or deploy. Authentication, normalization, instruction dispatch, wallet handling, and deployment stay with the host program and operator.
 
 ## Model v1
 
