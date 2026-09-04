@@ -1,0 +1,26 @@
+[package]
+name = "rialo-pr-sentinel"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Deterministic, side-effect-free GitHub pull-request risk scoring core"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "pr-sentinel-demo"
+path = "src/bin/demo.rs"
+
+[features]
+default = []
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"
+pedantic = "deny"
+nursery = "deny"
